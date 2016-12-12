@@ -37,13 +37,6 @@ import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 import yahoofinance.quotes.stock.StockQuote;
 
-import static com.udacity.stockhawk.R.id.price;
-import static com.udacity.stockhawk.sync.QuoteSyncJob.STOCK_STATUS_INVALID;
-import static com.udacity.stockhawk.sync.QuoteSyncJob.STOCK_STATUS_OK;
-import static com.udacity.stockhawk.sync.QuoteSyncJob.STOCK_STATUS_SERVER_DOWN;
-import static com.udacity.stockhawk.sync.QuoteSyncJob.STOCK_STATUS_SERVER_INVALID;
-import static com.udacity.stockhawk.sync.QuoteSyncJob.STOCK_STATUS_UNKNOWN;
-
 public final class QuoteSyncJob {
 
     static final String LOG_TAG = QuoteSyncJob.class.getSimpleName();

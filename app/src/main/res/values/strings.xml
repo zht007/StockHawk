@@ -29,7 +29,10 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_add">Add</string>
 
-    <string name="error_stock_not_found">Symbol %s is invalid!</string>
+    <string name="error_no_available_stocks">No Stock Information Available</string>
+    <string name="error_server_down">No stock information available, The server is not returning data</string>
+    <string name="error_server_invalid">No stock information available, The server is not returning valid data.Please check for an updated version of StockHawk</string>
+    <string name="error_stock_not_found">The symbol is invalid!</string>
     <string name="error_no_network">No network connectivity! Will load stock cursor when the network is available.</string>
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
 

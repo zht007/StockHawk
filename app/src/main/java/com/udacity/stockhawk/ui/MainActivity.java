@@ -1,10 +1,12 @@
 package com.udacity.stockhawk.ui;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -29,9 +31,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
+import static android.R.attr.key;
+
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener,
-        StockAdapter.StockAdapterOnClickHandler {
+        StockAdapter.StockAdapterOnClickHandler,
+        SharedPreferences.OnSharedPreferenceChangeListener{
 
     private static final int STOCK_LOADER = 0;
     @BindView(R.id.recycler_view)
@@ -49,6 +54,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Timber.d("Symbol clicked: %s", symbol);
     }
 
+
+
+    @Override
+    protected void onResume() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.registerOnSharedPreferenceChangeListener(this);
+        super.onResume();
+    }
+    @Override
+    protected void onPause() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,23 +115,60 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onRefresh() {
 
         QuoteSyncJob.syncImmediately(this);
+        updateErrorMessage();
 
-        if (!networkUp() && adapter.getItemCount() == 0) {
+
+    }
+
+    private void updateErrorMessage() {
+//        if (!networkUp() && adapter.getItemCount() == 0) {
+//            swipeRefreshLayout.setRefreshing(false);
+//            error.setText(getString(R.string.error_no_network));
+//            error.setVisibility(View.VISIBLE);
+//        } else if (!networkUp()) {
+//            swipeRefreshLayout.setRefreshing(false);
+//            Toast.makeText(this, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
+//        } else if (PrefUtils.getStocks(this).size() == 0) {
+//            Timber.d("WHYAREWEHERE");
+//            swipeRefreshLayout.setRefreshing(false);
+//            error.setText(getString(R.string.error_no_stocks));
+//            error.setVisibility(View.VISIBLE);
+//        } else {
+//            swipeRefreshLayout.setRefreshing(false);
+//            error.setVisibility(View.GONE);
+//        }
+
+
+            int message = R.string.error_no_available_stocks;
+            int stockStatus = PrefUtils.getStockStatus(this);
+            switch (stockStatus){
+                case QuoteSyncJob.STOCK_STATUS_SERVER_DOWN:
+                    message = R.string.error_server_down;
+                    break;
+                case QuoteSyncJob.STOCK_STATUS_INVALID:
+                    message = R.string.error_stock_not_found;
+                    break;
+                case QuoteSyncJob.STOCK_STATUS_SERVER_INVALID:
+                    message = R.string.error_server_invalid;
+                    break;
+                default:
+                    if(!networkUp()){
+                        message = R.string.error_no_network;
+                    }
+
+            }
+        if(adapter.getItemCount() == 0) {
             swipeRefreshLayout.setRefreshing(false);
-            error.setText(getString(R.string.error_no_network));
+            error.setText(message);
             error.setVisibility(View.VISIBLE);
-        } else if (!networkUp()) {
-            swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(this, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
-        } else if (PrefUtils.getStocks(this).size() == 0) {
-            Timber.d("WHYAREWEHERE");
-            swipeRefreshLayout.setRefreshing(false);
-            error.setText(getString(R.string.error_no_stocks));
-            error.setVisibility(View.VISIBLE);
-        } else {
+        }else {
             swipeRefreshLayout.setRefreshing(false);
             error.setVisibility(View.GONE);
+            if(message != R.string.error_no_available_stocks) {
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            }
         }
+
     }
 
     public void button(View view) {
@@ -188,5 +244,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(key.equals(getString(R.string.pref_stocks_status_key))){
+            updateErrorMessage();
+        }
+
     }
 }
