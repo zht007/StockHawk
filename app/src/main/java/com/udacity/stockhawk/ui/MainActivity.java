@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setRefreshing(true);
         onRefresh();
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             error.setText(getString(R.string.error_no_stocks));
             error.setVisibility(View.VISIBLE);
         } else {
+            swipeRefreshLayout.setRefreshing(false);
             error.setVisibility(View.GONE);
         }
     }
