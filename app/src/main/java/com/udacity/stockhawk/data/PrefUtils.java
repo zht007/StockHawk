@@ -94,4 +94,11 @@ public final class PrefUtils {
         return sp.getInt(c.getString(R.string.pref_stocks_status_key), QuoteSyncJob.STOCK_STATUS_UNKNOWN);
     }
 
+    static public void resetStockStatus(Context context){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor spe = sp.edit();
+        spe.putInt(context.getString(R.string.pref_stocks_status_key),QuoteSyncJob.STOCK_STATUS_UNKNOWN);
+        spe.apply();
+    }
+
 }
