@@ -1,10 +1,12 @@
 package com.udacity.stockhawk.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -32,6 +34,7 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 import static android.R.attr.key;
+import static com.udacity.stockhawk.data.Contract.Quote.uri;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener,
@@ -75,7 +78,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        adapter = new StockAdapter(this, this);
+        adapter = new StockAdapter(this, new StockAdapter.StockAdapterOnClickHandler() {
+            @Override
+            public void onClick(String symbol) {
+                Uri uri = Contract.Quote.makeUriForStock(symbol);
+//                Intent intent = new Intent(getApplicationContext(),HistoryActivity.class)
+//                        .setData(uri);
+//                getApplicationContext().startActivity(intent);
+                onItemSelected(uri);
+
+            }
+        });
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -121,24 +134,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void updateErrorMessage() {
-//        if (!networkUp() && adapter.getItemCount() == 0) {
-//            swipeRefreshLayout.setRefreshing(false);
-//            error.setText(getString(R.string.error_no_network));
-//            error.setVisibility(View.VISIBLE);
-//        } else if (!networkUp()) {
-//            swipeRefreshLayout.setRefreshing(false);
-//            Toast.makeText(this, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
-//        } else if (PrefUtils.getStocks(this).size() == 0) {
-//            Timber.d("WHYAREWEHERE");
-//            swipeRefreshLayout.setRefreshing(false);
-//            error.setText(getString(R.string.error_no_stocks));
-//            error.setVisibility(View.VISIBLE);
-//        } else {
-//            swipeRefreshLayout.setRefreshing(false);
-//            error.setVisibility(View.GONE);
-//        }
-
-
             int message = R.string.error_no_available_stocks;
             int stockStatus = PrefUtils.getStockStatus(this);
             switch (stockStatus){
@@ -193,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(this,
-                Contract.Quote.uri,
+                uri,
                 Contract.Quote.QUOTE_COLUMNS,
                 null, null, Contract.Quote.COLUMN_SYMBOL);
     }
@@ -252,5 +247,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             updateErrorMessage();
         }
 
+    }
+
+    public void onItemSelected(Uri uri){
+        Intent intent = new Intent(this,HistoryActivity.class)
+                .setData(uri);
+        startActivity(intent);
     }
 }
